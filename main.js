@@ -19,15 +19,16 @@ async function InitApp() {
         startSimulation: "on-assets-loaded",        
     });
 
+    SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
+    SDK3DVerse.actionMap.propagate();
+
     await InitFirstPersonController(characterControllerSceneUUID);
     canvas.addEventListener('mousedown', () => setPointerLock(canvas));
-
-
 }
 
 const setPointerLock = (canvas) => {
     setFPSCameraController(canvas);
-    window.removeEventListener('mousedown', setPointerLock);
+    //canvas.removeEventListener('mousedown', () => setPointerLock(canvas));
 }
 
 //------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ async function setFPSCameraController(canvas){
         || canvas.mozRequestPointerLock 
         || canvas.webkitPointerLockElement
     );
-    canvas.requestPointerLock();
+    canvas.requestPointerLock({unadjustedMovement: true});
 };
 
 
