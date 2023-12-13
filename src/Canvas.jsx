@@ -1,5 +1,16 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, Component } from 'react';
 import { useScript } from '@uidotdev/usehooks';
+
+
+
+class ExampleComponent extends Component {
+    handleKeyDown(event) {
+    console.log(`You pressed ${event.key}`);
+    } 
+   render() {
+    return <div onKeyDown={this.handleKeyDown}>Press a key</div>; 
+   }
+    }
 
 export const Canvas = () => {
     const status = useScript(
@@ -9,19 +20,25 @@ export const Canvas = () => {
         }
     );
 
+    const setPointerLock = useCallback(async (canvas) => {
+        setFPSCameraController(canvas);
+        //canvas.removeEventListener('mousedown', () => setPointerLock(canvas));
+    }, []);
+
     const initApp = useCallback(async () => {
+        let canvas = document.getElementById("display-canvas");
         await SDK3DVerse.joinOrStartSession({
             userToken: 'public_LvjRC9RtA8dqpVEh',
             sceneUUID: 'ea9425d6-b3e4-41f0-a362-951cc4a45dde',
-            canvas: document.getElementById('display-canvas'),
-            viewportProperties: {
-              defaultControllerType: SDK3DVerse.controller_type.orbit,
-            },
+            canvas: canvas,
+
             connectToEditor: true,
             startSimulation: "on-assets-loaded",
         });
+        canvas.addEventListener('mousedown', () => setPointerLock(canvas));
         await InitFirstPersonController("83d6449d-4d37-424a-a083-477df89b91c7");
-    }, []);
+
+    }, [setPointerLock]);
 
     const InitFirstPersonController = async (charCtlSceneUUID) => {
         // To spawn an entity we need to create an EntityTempllate and specify the
@@ -65,6 +82,24 @@ export const Canvas = () => {
         SDK3DVerse.setMainCamera(firstPersonCamera);
     }
 
+    async function setFPSCameraController(canvas){
+        // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
+        // LOOK_DOWN actions.
+        SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
+        SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ["MOUSE_AXIS_X_NEG"];
+        SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ["MOUSE_AXIS_Y_NEG"];
+        SDK3DVerse.actionMap.values["LOOK_UP"][0] = ["MOUSE_AXIS_Y_POS"];
+        SDK3DVerse.actionMap.propagate();
+    
+        // Lock the mouse pointer
+        canvas.requestPointerLock = (
+            canvas.requestPointerLock 
+            || canvas.mozRequestPointerLock 
+            || canvas.webkitPointerLockElement
+        );
+        canvas.requestPointerLock({unadjustedMovement: true});
+    };
+
     useEffect(() => {
         if (status === 'ready') {
             initApp();
@@ -81,6 +116,7 @@ export const Canvas = () => {
                     verticalAlign: 'middle',
                 }}
             ></canvas>
+            <ExampleComponent />
         </>
     );
 };
