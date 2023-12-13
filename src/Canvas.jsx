@@ -1,8 +1,6 @@
 import { useCallback, useEffect, Component } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
-
-
 class ExampleComponent extends Component {
     handleKeyDown(event) {
     console.log(`You pressed ${event.key}`);
@@ -10,7 +8,7 @@ class ExampleComponent extends Component {
    render() {
     return <div onKeyDown={this.handleKeyDown}>Press a key</div>; 
    }
-    }
+};
 
 export const Canvas = () => {
     const status = useScript(
@@ -31,11 +29,14 @@ export const Canvas = () => {
             userToken: 'public_LvjRC9RtA8dqpVEh',
             sceneUUID: 'ea9425d6-b3e4-41f0-a362-951cc4a45dde',
             canvas: canvas,
-
             connectToEditor: true,
             startSimulation: "on-assets-loaded",
         });
+        
+        SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
+        SDK3DVerse.actionMap.propagate();
         canvas.addEventListener('mousedown', () => setPointerLock(canvas));
+        
         await InitFirstPersonController("83d6449d-4d37-424a-a083-477df89b91c7");
 
     }, [setPointerLock]);
@@ -82,7 +83,7 @@ export const Canvas = () => {
         SDK3DVerse.setMainCamera(firstPersonCamera);
     }
 
-    async function setFPSCameraController(canvas){
+    const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
         // LOOK_DOWN actions.
         SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
@@ -115,6 +116,7 @@ export const Canvas = () => {
                     width: '100vw',
                     verticalAlign: 'middle',
                 }}
+                tabIndex="1"
             ></canvas>
             <ExampleComponent />
         </>
