@@ -21,9 +21,18 @@ async function InitApp() {
 
     SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
     SDK3DVerse.actionMap.propagate();
-
-    await InitFirstPersonController(characterControllerSceneUUID);
     canvas.addEventListener('mousedown', () => setPointerLock(canvas));
+    await InitFirstPersonController(characterControllerSceneUUID);
+    
+
+    //console log Euler Orientation of camera in an interval :
+    
+    //console.log(SDK3DVerse.engineAPI.cameraAPI.getHoveredViewport([100,100]).getCamera().components.local_transform.eulerOrientation)
+
+    SDK3DVerse.engineAPI.registerToEvent("920f040f-1054-4dc4-9566-3b65282c0c7d", "log", (event) => console.log(event.dataObject.output));
+    SDK3DVerse.engineAPI.registerToEvent("7a8cc05e-8659-4b23-99d1-1352d13e2020", "enter_trigger", (event) => console.log(event));
+    //console.log("registered to event log");
+
 }
 
 const setPointerLock = (canvas) => {
@@ -84,7 +93,6 @@ async function InitFirstPersonController(charCtlSceneUUID) {
     const firstPersonCamera = children.find((child) =>
         child.isAttached("camera")
     );
-
     // We need to assign the current client to the first person controller
     // script which is attached to the firstPersonController entity.
     // This allows the script to know which client inputs it should read.
@@ -92,4 +100,5 @@ async function InitFirstPersonController(charCtlSceneUUID) {
 
     // Finally set the first person camera as the main camera.
     SDK3DVerse.setMainCamera(firstPersonCamera);
+    console.log(firstPersonController);
 }
