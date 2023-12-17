@@ -1,14 +1,5 @@
-import { useCallback, useEffect, Component } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
-
-class ExampleComponent extends Component {
-    handleKeyDown(event) {
-    console.log(`You pressed ${event.key}`);
-    } 
-   render() {
-    return <div onKeyDown={this.handleKeyDown}>Press a key</div>; 
-   }
-};
 
 export const Canvas = () => {
     const status = useScript(
@@ -25,7 +16,7 @@ export const Canvas = () => {
 
     const initApp = useCallback(async () => {
         let canvas = document.getElementById("display-canvas");
-        await SDK3DVerse.joinOrStartSession({
+        const isSessionCreated = await SDK3DVerse.joinOrStartSession({
             userToken: 'public_LvjRC9RtA8dqpVEh',
             sceneUUID: 'ea9425d6-b3e4-41f0-a362-951cc4a45dde',
             canvas: canvas,
@@ -118,7 +109,6 @@ export const Canvas = () => {
                 }}
                 tabIndex="1"
             ></canvas>
-            <ExampleComponent />
         </>
     );
 };
