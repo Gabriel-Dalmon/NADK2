@@ -5,8 +5,15 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
+import {Howl, Howler} from 'howler';
 
 export function Cadena() {
+    Howler.volume(0.5);
+    
+    var sound = new Howl({
+        src: ['lockedSound.mp3']
+      });
+
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -33,6 +40,7 @@ export function Cadena() {
         }
         else {
             console.log("fermé");
+            sound.play();
             document.getElementById("locked").innerHTML = "Rien ne se passe..."; 
         }
 
