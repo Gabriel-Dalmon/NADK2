@@ -1,94 +1,198 @@
 //------------------------------------------------------------------------------
 import {
-  publicToken,
-  mainSceneUUID,
-  characterControllerSceneUUID,
-} from "./config.js";
+    publicToken,
+    mainSceneUUID,
+    characterControllerSceneUUID,
+  } from "./config.js";
+  
+  //------------------------------------------------------------------------------
+  window.addEventListener("load", InitApp);
 
-//------------------------------------------------------------------------------
-window.addEventListener("load", InitApp);
-
-//------------------------------------------------------------------------------
-async function InitApp() {
-    let canvas = document.getElementById("display-canvas");
-    await SDK3DVerse.joinOrStartSession({
-        userToken: publicToken,
-        sceneUUID: mainSceneUUID,
-        canvas: canvas,
-        connectToEditor: true,
-        startSimulation: "on-assets-loaded",        
-    });
-
-    await InitFirstPersonController(characterControllerSceneUUID);
-    canvas.addEventListener('mousedown', () => setPointerLock(canvas));
-
-
+  const callbackConsoleEvent = (content) => {
+    console.log(content.dataObject.output);
 }
+  
+  //------------------------------------------------------------------------------
+  //we initialize the global variable for the firstPersonController of the client that we will assigne and use later
+  var clientController;
 
-const setPointerLock = (canvas) => {
-    setFPSCameraController(canvas);
-    window.removeEventListener('mousedown', setPointerLock);
-}
+  async function InitApp() {
+      let canvas = document.getElementById("display-canvas");
+      await SDK3DVerse.joinOrStartSession({
+          userToken: publicToken,
+          sceneUUID: mainSceneUUID,
+          canvas: canvas,
+          connectToEditor: true,
+          startSimulation: "on-assets-loaded",
+      });
+  
+      await setControls();
+      await InitFirstPersonController(characterControllerSceneUUID);
+      canvas.addEventListener('mousedown', () => setPointerLock(canvas));
+      canvas.addEventListener('click', (e) => focusObject(e, canvas));
+      SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
+      SDK3DVerse.engineAPI.registerToEvent("6f541dea-8657-404f-b473-8dac2ab10e1f", "deposit_bp", callbackConsoleEvent);
+  }
+  
+  const setPointerLock = (canvas) => {
+      setFPSCameraController(canvas);
+      //canvas.removeEventListener('mousedown', () => setPointerLock(canvas));
+  }
+  const focusObject = async (e, canvas) => {
+      // Test if the button was indeed right clicked
+      if(e.button === 2)
+      {
+  
+          // Screen Space Ray on the middle of the screen
+          // This stores an [object Promise] in the JS variable
+          let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
+          if(objectClicked.entity != null)
+          {
+              if("d6b25d06-9387-4cc8-932e-d4f6eeffbcbd" in objectClicked.entity.getComponent('script_map').elements){
+                takeControl(objectClicked,);
+                
+              }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
+                moveToWorkbench(objectClicked.entity);
+              }
+          }
+          else
+          {
+              console.log("Missed");
+          }
+  
+          // If an object was hit, duplicate it in a scaled verison, handleable by players
+          // Camera work
+          // Character work
+      }
+  }
+  
+  //------------------------------------------------------------------------------
+  function takeControl(target){
+    target = target.entity.getParent();
+    console.log(target);
+    const basePosition = target.getGlobalTransform();
+    const playerValue = SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform();
+    console.log("base:"+basePosition.position);
+    
+    var distance = [];
+    distance.push(basePosition.position[0]-playerValue.position[0],basePosition.position[1]-playerValue.position[1],basePosition.position[2]-playerValue.position[2])
+    const norm = Math.sqrt(distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2]);
+    distance[0]/=norm;
+    distance[1]=0.5;
+    distance[2]/=norm;
+    console.log("distance :"+distance);
+    playerValue.position[0]+=2*distance[0];
+    playerValue.position[1]-=distance[1];
+    playerValue.position[2]+=2*distance[2];
 
-//------------------------------------------------------------------------------
-async function setFPSCameraController(canvas){
-    // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
-    // LOOK_DOWN actions.
-    SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
-    SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ["MOUSE_AXIS_X_NEG"];
-    SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ["MOUSE_AXIS_Y_NEG"];
-    SDK3DVerse.actionMap.values["LOOK_UP"][0] = ["MOUSE_AXIS_Y_POS"];
-    SDK3DVerse.actionMap.propagate();
+    console.log("new value"+playerValue.position);
+    target.setGlobalTransform(playerValue);
+      SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "horizontal", [target]);
+      focusToEntity(target);
+      let canvas = document.getElementById("display-canvas");
+      canvas.addEventListener('click', () => focusBackToFPC(target, basePosition, canvas));
+    }
 
-    // Lock the mouse pointer
-    canvas.requestPointerLock = (
-        canvas.requestPointerLock 
-        || canvas.mozRequestPointerLock 
-        || canvas.webkitPointerLockElement
-    );
-    canvas.requestPointerLock();
-};
+  function focusToEntity(target){
+        SDK3DVerse.engineAPI.assignClientToScripts(target);
+        SDK3DVerse.engineAPI.detachClientFromScripts(clientController);
+      }
+    
+  function focusBackToFPC(target, basePosition, canvas){
+    SDK3DVerse.engineAPI.assignClientToScripts(clientController);
+    SDK3DVerse.engineAPI.detachClientFromScripts(target);
+    console.log(basePosition);
+    target.setGlobalTransform(basePosition);
+    canvas.removeEventListener('click', () => focusBackToFPC(target, canvas));
+      }
 
-
-//------------------------------------------------------------------------------
-async function InitFirstPersonController(charCtlSceneUUID) {
-    // To spawn an entity we need to create an EntityTempllate and specify the
-    // components we want to attach to it. In this case we only want a scene_ref
-    // that points to the character controller scene.
-    const playerTemplate = new SDK3DVerse.EntityTemplate();
-    playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
-
-    // Passing null as parent entity will instantiate our new entity at the root
-    // of the main scene.
-    const parentEntity = null;
-    // Setting this option to true will ensure that our entity will be destroyed
-    // when the client is disconnected from the session, making sure we don't
-    // leave our 'dead' player body behind.
-    const deleteOnClientDisconnection = true;
-    // We don't want the player to be saved forever in the scene, so we
-    // instantiate a transient entity.
-    // Note that an entity template can be instantiated multiple times.
-    // Each instantiation results in a new entity.
-    const playerSceneEntity = await playerTemplate.instantiateTransientEntity(
-        "Player",
-        parentEntity,
-        deleteOnClientDisconnection
-    );
-
-    // The character controller scene is setup as having a single entity at its
-    // root which is the first person controller itself.
-    const firstPersonController = (await playerSceneEntity.getChildren())[0];
-    // Look for the first person camera in the children of the controller.
-    const children = await firstPersonController.getChildren();
-    const firstPersonCamera = children.find((child) =>
-        child.isAttached("camera")
-    );
-
-    // We need to assign the current client to the first person controller
-    // script which is attached to the firstPersonController entity.
-    // This allows the script to know which client inputs it should read.
-    SDK3DVerse.engineAPI.assignClientToScripts(firstPersonController);
-
-    // Finally set the first person camera as the main camera.
-    SDK3DVerse.setMainCamera(firstPersonCamera);
-}
+    async function moveToWorkbench(target){
+        SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
+        target.setVisibility(false);
+        let itemID = target.components.debug_name.value.charAt(8);
+        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb bp '+itemID);
+        await wbItem[0].setVisibility(true);
+    }
+  
+  //------------------------------------------------------------------------------
+  async function setFPSCameraController(canvas){
+      // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
+      // LOOK_DOWN actions.
+      SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
+      SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ["MOUSE_AXIS_X_NEG"];
+      SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ["MOUSE_AXIS_Y_NEG"];
+      SDK3DVerse.actionMap.values["LOOK_UP"][0] = ["MOUSE_AXIS_Y_POS"];
+      
+      SDK3DVerse.actionMap.propagate();
+  
+      // Lock the mouse pointer
+      canvas.requestPointerLock = (
+          canvas.requestPointerLock 
+          || canvas.mozRequestPointerLock 
+          || canvas.webkitPointerLockElement
+      );
+      canvas.requestPointerLock({unadjustedMovement: true});
+  };
+  
+  //------------------------------------------------------------------------------
+  async function setControls()
+  {
+      // Set JUMP and SELECT
+      SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
+      SDK3DVerse.actionMap.values["SELECT"] = [["KEY_104"]];
+  
+      // Add to the action map detection of the mous clicks
+      // It seems MOUSE is ignored when any of the other 2 are set. It doesn't do this for default settings however, curious...
+      SDK3DVerse.actionMap.values.PICKUP_OBJ = [
+          ["MOUSE_BTN_RIGHT"]
+          //["TOUCH_TAP"],
+          //["GAMEPAD_BUTTON_B"], // The actionMap uses Nintendo-naming convention
+      ];
+  
+      SDK3DVerse.actionMap.propagate();
+  }
+  
+  //------------------------------------------------------------------------------
+  async function InitFirstPersonController(charCtlSceneUUID) {
+      // To spawn an entity we need to create an EntityTempllate and specify the
+      // components we want to attach to it. In this case we only want a scene_ref
+      // that points to the character controller scene.
+      const playerTemplate = new SDK3DVerse.EntityTemplate();
+      playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
+  
+      // Passing null as parent entity will instantiate our new entity at the root
+      // of the main scene.
+      const parentEntity = null;
+      // Setting this option to true will ensure that our entity will be destroyed
+      // when the client is disconnected from the session, making sure we don't
+      // leave our 'dead' player body behind.
+      const deleteOnClientDisconnection = true;
+      // We don't want the player to be saved forever in the scene, so we
+      // instantiate a transient entity.
+      // Note that an entity template can be instantiated multiple times.
+      // Each instantiation results in a new entity.
+      const playerSceneEntity = await playerTemplate.instantiateTransientEntity(
+          "Player",
+          parentEntity,
+          deleteOnClientDisconnection
+      );
+  
+      // The character controller scene is setup as having a single entity at its
+      // root which is the first person controller itself.
+      const firstPersonController = (await playerSceneEntity.getChildren())[0];
+      // Look for the first person camera in the children of the controller.
+      const children = await firstPersonController.getChildren();
+      const firstPersonCamera = children.find((child) =>
+          child.isAttached("camera")
+      );
+  
+      // We need to assign the current client to the first person controller
+      // script which is attached to the firstPersonController entity.
+      // This allows the script to know which client inputs it should read.
+      SDK3DVerse.engineAPI.assignClientToScripts(firstPersonController);
+  
+      // Finally set the first person camera as the main camera.
+      SDK3DVerse.setMainCamera(firstPersonCamera);
+      clientController = firstPersonController;
+  }
+  
