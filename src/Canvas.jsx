@@ -1,3 +1,4 @@
+import { userPublicToken, mainSceneUUID, characterControllerSceneUUID} from './config.js';
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
@@ -9,30 +10,98 @@ export const Canvas = () => {
         }
     );
 
+    const callbackConsoleEvent = (content) => {
+        console.log(content.dataObject.output);
+    }
+
+    //we initialize the global variable for the firstPersonController of the client that we will assigne and use later
+    //window.clientController;
+
     const setPointerLock = useCallback(async (canvas) => {
         setFPSCameraController(canvas);
         //canvas.removeEventListener('mousedown', () => setPointerLock(canvas));
     }, []);
 
-    const initApp = useCallback(async () => {
+    //------------------------------------------------------------------------------
+
+    const focusToEntity = useCallback((target) =>{
+        SDK3DVerse.engineAPI.assignClientToScripts(target);
+        SDK3DVerse.engineAPI.detachClientFromScripts(window.clientController);
+    }, []);
+    
+    const focusBackToFPC = useCallback((target, basePosition, canvas) => {
+        SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
+        SDK3DVerse.engineAPI.detachClientFromScripts(target);
+        console.log(basePosition);
+        target.setGlobalTransform(basePosition);
+        canvas.removeEventListener('click', () => focusBackToFPC(target, canvas));
+    }, []);
+    
+    const takeControl = useCallback((target) => {
+        target = target.entity.getParent();
+        console.log(target);
+        const basePosition = target.getGlobalTransform();
+        const playerValue = SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform();
+        console.log("base:"+basePosition.position);
+        
+        var distance = [];
+        distance.push(basePosition.position[0]-playerValue.position[0],basePosition.position[1]-playerValue.position[1],basePosition.position[2]-playerValue.position[2])
+        const norm = Math.sqrt(distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2]);
+        distance[0]/=norm;
+        distance[1]=0.5;
+        distance[2]/=norm;
+        console.log("distance :"+distance);
+        playerValue.position[0]+=2*distance[0];
+        playerValue.position[1]-=distance[1];
+        playerValue.position[2]+=2*distance[2];
+
+        console.log("new value"+playerValue.position);
+        target.setGlobalTransform(playerValue);
+        SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "horizontal", [target]);
+        focusToEntity(target);
         let canvas = document.getElementById("display-canvas");
-        const isSessionCreated = await SDK3DVerse.joinOrStartSession({
-            userToken: 'public_LvjRC9RtA8dqpVEh',
-            sceneUUID: 'ea9425d6-b3e4-41f0-a362-951cc4a45dde',
-            canvas: canvas,
-            connectToEditor: true,
-            startSimulation: "on-assets-loaded",
-        });
-        
-        SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
-        SDK3DVerse.actionMap.propagate();
-        canvas.addEventListener('mousedown', () => setPointerLock(canvas));
-        
-        await InitFirstPersonController("83d6449d-4d37-424a-a083-477df89b91c7");
+        canvas.addEventListener('click', () => focusBackToFPC(target, basePosition, canvas));
+    }, [focusToEntity, focusBackToFPC]);
 
-    }, [setPointerLock]);
+    const focusObject = useCallback(async (e, canvas) => {
+        // Test if the button was indeed right clicked
+        console.log("lol");
 
-    const InitFirstPersonController = async (charCtlSceneUUID) => {
+        // Screen Space Ray on the middle of the screen
+        // This stores an [object Promise] in the JS variable
+        let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
+        if(objectClicked.entity != null)
+        {
+            if(objectClicked.entity.isAttached('script_map') ) { 
+                if("d6b25d06-9387-4cc8-932e-d4f6eeffbcbd" in objectClicked.entity.getComponent('script_map').elements){
+                    takeControl(objectClicked,);
+                    
+                }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
+                    moveToWorkbench(objectClicked.entity);
+                }
+            }
+        }
+        else
+        {
+            console.log("Missed");
+        }
+
+        // If an object was hit, duplicate it in a scaled verison, handleable by players
+        // Camera work
+        // Character work
+    }, [takeControl]);
+
+    async function moveToWorkbench(target){
+        SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
+        target.setVisibility(false);
+        let itemID = target.components.debug_name.value.charAt(8);
+        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb bp '+itemID);
+        await wbItem[0].setVisibility(true);
+    }
+  
+    //------------------------------------------------------------------------------
+
+    const InitFirstPersonController = useCallback(async (charCtlSceneUUID) => {
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
@@ -72,7 +141,28 @@ export const Canvas = () => {
 
         // Finally set the first person camera as the main camera.
         SDK3DVerse.setMainCamera(firstPersonCamera);
-    }
+        window.clientController = firstPersonController;
+    }, []);
+
+    const initApp = useCallback(async () => {
+        let canvas = document.getElementById("display-canvas");
+        await SDK3DVerse.joinOrStartSession({
+            userToken: userPublicToken,
+            sceneUUID: mainSceneUUID,
+            canvas: canvas,
+            connectToEditor: true,
+            startSimulation: "on-assets-loaded",
+        });
+        
+        SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
+        SDK3DVerse.actionMap.propagate();
+        canvas.addEventListener('mousedown', () => setPointerLock(canvas));
+        
+        await InitFirstPersonController(characterControllerSceneUUID);
+
+        canvas.addEventListener('click', (e) => focusObject(e, canvas));
+        SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
+    }, [InitFirstPersonController, setPointerLock, focusObject]);
 
     const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 

@@ -23,7 +23,7 @@ export function ControlsCard() {
               </Card.Text>
             </ListGroup.Item>
             <ListGroup.Item>
-              <Card.Title>Intéractions</Card.Title>
+              <Card.Title>Interactions</Card.Title>
               <Card.Text>
                 <HandIndex color="royalblue" size={24} /> <br />
                 Clic gauche

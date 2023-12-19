@@ -11,7 +11,7 @@ export function Cadena() {
     Howler.volume(0.5);
     
     var sound = new Howl({
-        src: ['lockedSound.mp3']
+        src: ['fx/lockedSound.mp3']
       });
 
     const [show, setShow] = useState(false);
