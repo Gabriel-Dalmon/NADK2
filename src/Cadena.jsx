@@ -8,11 +8,15 @@ import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
 export function Cadena() {
-    Howler.volume(0.5);
+    Howler.volume(1);
     
-    var sound = new Howl({
+    var locked = new Howl({
         src: ['fx/lockedSound.mp3']
-      });
+    });
+
+    var unlocked = new Howl({
+        src: ['fx/unlockedSound.mp3']
+    });
 
     const [show, setShow] = useState(false);
 
@@ -36,11 +40,12 @@ export function Cadena() {
 
         if (firstCodeNumber === "1" && secondCodeNumber === "1" && thirdCodeNumber === "1" && fourthCodeNumber === "1") {
             console.log("ouvert");
+            unlocked.play();
             handleClose();
         }
         else {
             console.log("fermé");
-            sound.play();
+            locked.play();
             document.getElementById("locked").innerHTML = "Rien ne se passe..."; 
         }
 
