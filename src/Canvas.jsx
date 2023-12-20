@@ -48,7 +48,6 @@ export const Canvas = () => {
         cardID = 2;
 
         target = target.entity.getParent();
-        console.log(target);
         const basePosition = target.getGlobalTransform();
         const playerValue = SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform();
         console.log("base:"+basePosition.position);
@@ -64,7 +63,6 @@ export const Canvas = () => {
         playerValue.position[1]-=distance[1];
         playerValue.position[2]+=2*distance[2];
 
-        console.log("new value"+playerValue.position);
         target.setGlobalTransform(playerValue);
         SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "horizontal", [target]);
         focusToEntity(target);
@@ -73,23 +71,32 @@ export const Canvas = () => {
         console.log(cardID);
     }, [focusToEntity, focusBackToFPC]);
 
-    const focusObject = useCallback(async (e, canvas) => {
-        // Test if the button was indeed right clicked
-        console.log("lol");
+    const moveToWorkbench = useCallback(async function (e, canvas, target){
+        if(e.code === "Space"){
+            SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
+        target.setVisibility(false);
+        let itemID = target.components.debug_name.value.charAt(10);
+        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+itemID);
+        await wbItem[0].setVisibility(true);
+        canvas.removeEventListener('keydown', (e) => moveToWorkbench(e, canvas, target));
+        }
+    }, []);
 
-        // Screen Space Ray on the middle of the screen
-        // This stores an [object Promise] in the JS variable
-        let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
-        console.log(e);
+    const focusObject = useCallback(async (e, canvas) => {
+        // Test if the button was indeed left click
         if(e.button === 0){
+            // Screen Space Ray on the middle of the screen
+            // This stores an [object Promise] in the JS variable
+            let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
+            console.log(e);
             if(objectClicked.entity != null)
             {
                 if(objectClicked.entity.isAttached('script_map') ) { 
-                    if("d6b25d06-9387-4cc8-932e-d4f6eeffbcbd" in objectClicked.entity.getComponent('script_map').elements){
+                    if("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements){
                         takeControl(objectClicked,);
                         
                     }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
-                        moveToWorkbench(objectClicked.entity);
+                        canvas.addEventListener('keydown', (e) => moveToWorkbench(e, canvas, objectClicked.entity));
                     }
                 }
             }
@@ -102,15 +109,8 @@ export const Canvas = () => {
         // If an object was hit, duplicate it in a scaled verison, handleable by players
         // Camera work
         // Character work
-    }, [takeControl]);
+    }, [takeControl, moveToWorkbench]);
 
-    async function moveToWorkbench(target){
-        SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
-        target.setVisibility(false);
-        let itemID = target.components.debug_name.value.charAt(10);
-        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+itemID);
-        await wbItem[0].setVisibility(true);
-    }
   
     //------------------------------------------------------------------------------
 
@@ -157,6 +157,11 @@ export const Canvas = () => {
         window.clientController = firstPersonController;
     }, []);
 
+    const buildHelicopter = useCallback( () => {
+        const helicopter = SDK3DVerse.engineAPI.findEntitiesByNames('helicopter');
+        helicopter.setVisibility(true);
+    }, []);
+
     const initApp = useCallback(async () => {
         let canvas = document.getElementById("display-canvas");
         await SDK3DVerse.joinOrStartSession({
@@ -175,7 +180,8 @@ export const Canvas = () => {
 
         canvas.addEventListener('click', (e) => focusObject(e, canvas));
         SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
-    }, [InitFirstPersonController, setPointerLock, focusObject]);
+        SDK3DVerse.engineAPI.registerToEvent("4ac15242-946d-4fec-8256-c516095969d2", "build", buildHelicopter);
+    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter]);
 
     const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
