@@ -2,6 +2,8 @@ import { userPublicToken, mainSceneUUID, characterControllerSceneUUID} from './c
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
+export var cardID = 0;
+
 export const Canvas = () => {
     const status = useScript(
         `https://cdn.3dverse.com/legacy/sdk/latest/SDK3DVerse.js`,
@@ -9,6 +11,7 @@ export const Canvas = () => {
             removeOnUnmount: false,
         }
     );
+    
 
     const callbackConsoleEvent = (content) => {
         console.log(content.dataObject.output);
@@ -29,15 +32,21 @@ export const Canvas = () => {
         SDK3DVerse.engineAPI.detachClientFromScripts(window.clientController);
     }, []);
     
-    const focusBackToFPC = useCallback((target, basePosition, canvas) => {
-        SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
-        SDK3DVerse.engineAPI.detachClientFromScripts(target);
-        console.log(basePosition);
-        target.setGlobalTransform(basePosition);
-        canvas.removeEventListener('click', () => focusBackToFPC(target, canvas));
+    const focusBackToFPC = useCallback((target, basePosition, canvas, e) => {
+        if(e.button === 2){
+            cardID = 0;
+
+            SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
+            SDK3DVerse.engineAPI.detachClientFromScripts(target);
+            console.log(basePosition);
+            target.setGlobalTransform(basePosition);
+            canvas.removeEventListener('click', () => focusBackToFPC(target, canvas));
+        }
     }, []);
     
     const takeControl = useCallback((target) => {
+        cardID = 2;
+
         target = target.entity.getParent();
         console.log(target);
         const basePosition = target.getGlobalTransform();
@@ -60,7 +69,8 @@ export const Canvas = () => {
         SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "horizontal", [target]);
         focusToEntity(target);
         let canvas = document.getElementById("display-canvas");
-        canvas.addEventListener('click', () => focusBackToFPC(target, basePosition, canvas));
+        canvas.addEventListener('click', (e) => focusBackToFPC(target, basePosition, canvas, e));
+        console.log(cardID);
     }, [focusToEntity, focusBackToFPC]);
 
     const focusObject = useCallback(async (e, canvas) => {
@@ -70,20 +80,23 @@ export const Canvas = () => {
         // Screen Space Ray on the middle of the screen
         // This stores an [object Promise] in the JS variable
         let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
-        if(objectClicked.entity != null)
-        {
-            if(objectClicked.entity.isAttached('script_map') ) { 
-                if("d6b25d06-9387-4cc8-932e-d4f6eeffbcbd" in objectClicked.entity.getComponent('script_map').elements){
-                    takeControl(objectClicked,);
-                    
-                }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
-                    moveToWorkbench(objectClicked.entity);
+        console.log(e);
+        if(e.button === 0){
+            if(objectClicked.entity != null)
+            {
+                if(objectClicked.entity.isAttached('script_map') ) { 
+                    if("d6b25d06-9387-4cc8-932e-d4f6eeffbcbd" in objectClicked.entity.getComponent('script_map').elements){
+                        takeControl(objectClicked,);
+                        
+                    }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
+                        moveToWorkbench(objectClicked.entity);
+                    }
                 }
             }
-        }
-        else
-        {
-            console.log("Missed");
+            else
+            {
+                console.log("Missed");
+            }
         }
 
         // If an object was hit, duplicate it in a scaled verison, handleable by players
@@ -94,8 +107,8 @@ export const Canvas = () => {
     async function moveToWorkbench(target){
         SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
         target.setVisibility(false);
-        let itemID = target.components.debug_name.value.charAt(8);
-        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb bp '+itemID);
+        let itemID = target.components.debug_name.value.charAt(10);
+        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+itemID);
         await wbItem[0].setVisibility(true);
     }
   
