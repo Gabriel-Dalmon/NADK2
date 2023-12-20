@@ -3,16 +3,28 @@ import './HUD.css';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { ArrowUp, ArrowRight, ArrowLeft, ArrowDown, FastForwardFill, ChevronDoubleUp, HandIndex } from 'react-bootstrap-icons';
+import Button from 'react-bootstrap/Button';
 
 
-export function CardCanvas({props}){
-  if(props === 0){
-    return(<MainCard />)
-  }else if(props === 1){
-    return(<BlueprintCard />)
-  }else if(props === 2){
-    return(<RotationInteractionCard />)
-  }
+export function CardCanvas({ setCardState, cardState }){
+  //const [cardState, setCardState] = useState(0);
+
+  const handleCardChange = (newState) => {
+    setCardState(newState);
+    console.log("Card state changed");
+  };
+
+  return (
+    <>
+      <Button variant="primary" onClick={() => handleCardChange(0)}>MainCard</Button>
+      <Button variant="primary" onClick={() => handleCardChange(1)}>BlueprintCard</Button>
+      <Button variant="primary" onClick={() => handleCardChange(2)}>RotationInteractionCard</Button>
+
+      {cardState === 0 && <MainCard />}
+      {cardState === 1 && <BlueprintCard />}
+      {cardState === 2 && <RotationInteractionCard />}
+    </>
+  );
 }
 
 function MainCard() {

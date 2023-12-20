@@ -4,7 +4,7 @@ import { useScript } from '@uidotdev/usehooks';
 
 export var cardID = 0;
 
-export const Canvas = () => {
+export function Canvas({ handleCanvasChange }) {
     const status = useScript(
         `https://cdn.3dverse.com/legacy/sdk/latest/SDK3DVerse.js`,
         {
@@ -34,7 +34,8 @@ export const Canvas = () => {
     
     const focusBackToFPC = useCallback((target, basePosition, canvas, e) => {
         if(e.button === 2){
-            cardID = 0;
+            handleCanvasChange(1);
+            console.log("Entering focus");
 
             SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
             SDK3DVerse.engineAPI.detachClientFromScripts(target);
@@ -42,10 +43,11 @@ export const Canvas = () => {
             target.setGlobalTransform(basePosition);
             canvas.removeEventListener('click', () => focusBackToFPC(target, canvas));
         }
-    }, []);
+    }, [handleCanvasChange]);
     
     const takeControl = useCallback((target) => {
-        cardID = 2;
+        handleCanvasChange(2);
+        console.log("Entering control");
 
         target = target.entity.getParent();
         const basePosition = target.getGlobalTransform();
@@ -69,7 +71,7 @@ export const Canvas = () => {
         let canvas = document.getElementById("display-canvas");
         canvas.addEventListener('click', (e) => focusBackToFPC(target, basePosition, canvas, e));
         console.log(cardID);
-    }, [focusToEntity, focusBackToFPC]);
+    }, [focusToEntity, focusBackToFPC, handleCanvasChange]);
 
     const moveToWorkbench = useCallback(async function (e, canvas, target){
         if(e.code === "Space"){
