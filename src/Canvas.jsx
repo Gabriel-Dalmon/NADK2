@@ -1,4 +1,4 @@
-import { userPublicToken, mainSceneUUID, characterControllerSceneUUID} from './config.js';
+import { userPublicToken, mainSceneUUID, characterControllerSceneUUID, spawnPosition} from './config.js';
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
@@ -116,12 +116,13 @@ export function Canvas({ handleCanvasChange }) {
   
     //------------------------------------------------------------------------------
 
-    const InitFirstPersonController = useCallback(async (charCtlSceneUUID) => {
+    const InitFirstPersonController = useCallback(async (charCtlSceneUUID, spawnPosition) => {
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
         const playerTemplate = new SDK3DVerse.EntityTemplate();
         playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
+        playerTemplate.attachComponent("local_transform", { position: spawnPosition });
 
         // Passing null as parent entity will instantiate our new entity at the root
         // of the main scene.
@@ -178,7 +179,7 @@ export function Canvas({ handleCanvasChange }) {
         SDK3DVerse.actionMap.propagate();
         canvas.addEventListener('mousedown', () => setPointerLock(canvas));
         
-        await InitFirstPersonController(characterControllerSceneUUID);
+        await InitFirstPersonController(characterControllerSceneUUID, spawnPosition);
 
         canvas.addEventListener('click', (e) => focusObject(e, canvas));
         SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
