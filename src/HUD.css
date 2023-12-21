@@ -1,4 +1,4 @@
-.fixed {
-    z-index: '1';
-    position:'absolute';
+.margin {
+    margin-top: .6rem;
+    margin-left:.6rem;
 }

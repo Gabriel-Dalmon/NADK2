@@ -1,17 +1,14 @@
-import { userPublicToken, mainSceneUUID, characterControllerSceneUUID} from './config.js';
+import { userPublicToken, mainSceneUUID, characterControllerSceneUUID, spawnPosition} from './config.js';
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
-export var cardID = 0;
-
-export function Canvas({ handleCanvasChange }) {
+export function Canvas({ setIsLoading, handleCanvasChange }) {
     const status = useScript(
         `https://cdn.3dverse.com/legacy/sdk/latest/SDK3DVerse.js`,
         {
             removeOnUnmount: false,
         }
     );
-    
 
     const callbackConsoleEvent = (content) => {
         console.log(content.dataObject.output);
@@ -35,7 +32,7 @@ export function Canvas({ handleCanvasChange }) {
     const focusBackToFPC = useCallback((target, basePosition, canvas, e) => {
         if(e.button === 2){
             handleCanvasChange(0);
-            console.log("Entering focus");
+            console.log("Exit control");
 
             SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
             SDK3DVerse.engineAPI.detachClientFromScripts(target);
@@ -69,7 +66,6 @@ export function Canvas({ handleCanvasChange }) {
         focusToEntity(target);
         let canvas = document.getElementById("display-canvas");
         canvas.addEventListener('click', (e) => focusBackToFPC(target, basePosition, canvas, e));
-        console.log(cardID);
     }, [focusToEntity, focusBackToFPC, handleCanvasChange]);
 
     const moveToWorkbench = useCallback(async function (e, canvas, target){
@@ -165,13 +161,13 @@ export function Canvas({ handleCanvasChange }) {
   
     //------------------------------------------------------------------------------
 
-    const InitFirstPersonController = useCallback(async (charCtlSceneUUID) => {
+    const InitFirstPersonController = useCallback(async (charCtlSceneUUID, spawnPosition) => {
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
         const playerTemplate = new SDK3DVerse.EntityTemplate();
         playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
-        //playerTemplate.attachComponent("local_transform", { position: [-18, 11.4, 10] });
+        playerTemplate.attachComponent("local_transform", { position: spawnPosition });
 
         // Passing null as parent entity will instantiate our new entity at the root
         // of the main scene.
@@ -207,7 +203,10 @@ export function Canvas({ handleCanvasChange }) {
         // Finally set the first person camera as the main camera.
         SDK3DVerse.setMainCamera(firstPersonCamera);
         window.clientController = firstPersonController;
-    }, []);
+
+        
+        setIsLoading(false);
+    }, [setIsLoading]);
 
     const buildHelicopter = useCallback( () => {
         const helicopter = SDK3DVerse.engineAPI.findEntitiesByNames('helicopter');
@@ -217,6 +216,8 @@ export function Canvas({ handleCanvasChange }) {
 
     const initApp = useCallback(async () => {
         let canvas = document.getElementById("display-canvas");
+        setIsLoading(true);
+        // Join or start the session
         await SDK3DVerse.joinOrStartSession({
             userToken: userPublicToken,
             sceneUUID: mainSceneUUID,
@@ -225,16 +226,20 @@ export function Canvas({ handleCanvasChange }) {
             startSimulation: "on-assets-loaded",
         });
         
+        // Set the action map
         SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
         SDK3DVerse.actionMap.propagate();
+
+        // Lock the camera on mouse click
         canvas.addEventListener('mousedown', () => setPointerLock(canvas));
         
-        await InitFirstPersonController(characterControllerSceneUUID);
+        await InitFirstPersonController(characterControllerSceneUUID, spawnPosition);
 
         canvas.addEventListener('click', (e) => focusObject(e, canvas));
         SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
+        // Build the helicopter
         SDK3DVerse.engineAPI.registerToEvent("4ac15242-946d-4fec-8256-c516095969d2", "build", buildHelicopter);
-    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter]);
+    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading]);
 
     const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
@@ -254,6 +259,7 @@ export function Canvas({ handleCanvasChange }) {
         canvas.requestPointerLock({unadjustedMovement: true});
     };
 
+    // Initialize the app when the page loads
     useEffect(() => {
         if (status === 'ready') {
             initApp();

@@ -16,9 +16,11 @@ export function CardCanvas({ setCardState, cardState }){
 
   return (
     <>
-      <Button variant="primary" onClick={() => handleCardChange(0)}>MainCard</Button>
-      <Button variant="primary" onClick={() => handleCardChange(1)}>BlueprintCard</Button>
-      <Button variant="primary" onClick={() => handleCardChange(2)}>RotationInteractionCard</Button>
+      <div className='margin'>
+        <Button variant="primary" onClick={() => handleCardChange(0)}>MainCard</Button>
+        <Button variant="primary" onClick={() => handleCardChange(1)}>BlueprintCard</Button>
+        <Button variant="primary" onClick={() => handleCardChange(2)}>RotationInteractionCard</Button>
+      </div>
 
       {cardState === 0 && <MainCard />}
       {cardState === 1 && <BlueprintCard />}
@@ -29,7 +31,7 @@ export function CardCanvas({ setCardState, cardState }){
 
 function MainCard() {
     return (
-      <Card className="text-center">
+      <Card className="margin text-center">
         <Card.Header>Contrôles</Card.Header>
           <ListGroup variant="flush">
             <ListGroup.Item>
@@ -60,7 +62,7 @@ function MainCard() {
 
 function BlueprintCard() {
   return (
-    <Card className="text-center">
+    <Card className="margin text-center">
       <Card.Header>Contrôles</Card.Header>
         <ListGroup variant="flush">
           <ListGroup.Item>
@@ -85,7 +87,7 @@ function BlueprintCard() {
 
 function RotationInteractionCard() {
   return (
-    <Card className="text-center">
+    <Card className="margin text-center">
       <Card.Header>Contrôles</Card.Header>
         <ListGroup variant="flush">
           <ListGroup.Item>
