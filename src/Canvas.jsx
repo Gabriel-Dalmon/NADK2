@@ -266,14 +266,6 @@ export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
         //setup enigma
         setTimeout(() => {setupEnigma(); SDK3DVerse.engineAPI.startSimulation()}, 1000);
 
-        canvas.addEventListener('keydown', (e) => {
-            if(e.code === "KeyF"){
-                SDK3DVerse.engineAPI.fireEvent("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754", "enter_interaction", []);
-            }
-            if(e.code === "KeyS"){
-                SDK3DVerse.engineAPI.fireEvent("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754", "enter_interaction", []);
-            }
-        });
     }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading, setupEnigma]);
 
     const setFPSCameraController = async (canvas) => {
