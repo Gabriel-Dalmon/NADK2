@@ -7,4 +7,4 @@ export const mainSceneUUID = "ea9425d6-b3e4-41f0-a362-951cc4a45dde"; //Main Scen
 export const characterControllerSceneUUID = "7531fd31-458e-41e1-b6a3-b2978f413231"; //New Character Controller With State Machine
 
 //export const spawnPosition = [0, 0, 0]; //Test Scene Spawn Position
-export const spawnPosition = [-18, 11.4, 10]; //Main Scene Spawn Position
+export const spawnPosition = [19, 11.4, 0]; //Main Scene Spawn Position
