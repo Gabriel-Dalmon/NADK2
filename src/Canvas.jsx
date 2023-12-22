@@ -157,11 +157,11 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
             {
                 console.log(objectClicked.entity);
                 if(objectClicked.entity.isAttached('script_map') ) { 
-                    if(("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements)||("0c9049c1-d280-48ed-9cca-e5c56957cd63" in objectClicked.entity.getComponent('script_map').elements)){
+                    if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
                         console.log("yep");
                         bluePrintInterract(objectClicked,);
                         
-                    }else if("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements){
+                    }else if(("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements)||("0c9049c1-d280-48ed-9cca-e5c56957cd63" in objectClicked.entity.getComponent('script_map').elements)){
                         takeControl(objectClicked,);
                     }
                 }
