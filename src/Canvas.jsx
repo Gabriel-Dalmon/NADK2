@@ -2,7 +2,7 @@ import { userPublicToken, mainSceneUUID, characterControllerSceneUUID, spawnPosi
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
-export function Canvas({ setIsLoading, handleCanvasChange }) {
+export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
     const status = useScript(
         `https://cdn.3dverse.com/legacy/sdk/latest/SDK3DVerse.js`,
         {
@@ -63,11 +63,11 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         distance.push(basePosition.position[0]-playerValue.position[0],basePosition.position[1]-playerValue.position[1],basePosition.position[2]-playerValue.position[2])
         const norm = Math.sqrt(distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2]);
         distance[0]/=norm;
-        distance[1]=0.5;
+        distance[1]=-0.5;
         distance[2]/=norm;
         console.log("distance :"+distance);
         playerValue.position[0]+=2*distance[0];
-        playerValue.position[1]-=distance[1];
+        playerValue.position[1]+=distance[1];
         playerValue.position[2]+=2*distance[2];
 
         target.setGlobalTransform(playerValue);
@@ -153,6 +153,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
             // Screen Space Ray on the middle of the screen
             // This stores an [object Promise] in the JS variable
             let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
+            console.log(objectClicked.entity.getComponent("debug_name"))
             if(objectClicked.entity != null)
             {
                 console.log(objectClicked.entity);
@@ -164,6 +165,10 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
                     }else if("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements){
                         takeControl(objectClicked,);
                     }
+                } else if (objectClicked.entity.getComponent("debug_name").value === "Code") {
+                    console.log("Is Lock")
+                    showLock();
+
                 }
             }
             else
@@ -184,6 +189,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
+        console.log("Initiating First Person Controller Spawn")
         const playerTemplate = new SDK3DVerse.EntityTemplate();
         playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
         playerTemplate.attachComponent("local_transform", { position: spawnPosition });
@@ -213,7 +219,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         const firstPersonCamera = children.find((child) =>
           child.isAttached("camera")
         );
-
+        SDK3DVerse.engineAPI.fireEvent("a25ea293-d682-45d3-962f-bd63e870a7d3", "call_constructor", [firstPersonController]);
         // We need to assign the current client to the first person controller
         // script which is attached to the firstPersonController entity.
         // This allows the script to know which client inputs it should read.
@@ -256,7 +262,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         SDK3DVerse.engineAPI.registerToEvent("4ac15242-946d-4fec-8256-c516095969d2", "build", buildHelicopter);
 
         //setup enigma
-        setTimeout(() => {setupEnigma()}, 1000);
+        setTimeout(() => {setupEnigma(); SDK3DVerse.engineAPI.startSimulation()}, 1000);
     }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading, setupEnigma]);
 
     const setFPSCameraController = async (canvas) => {

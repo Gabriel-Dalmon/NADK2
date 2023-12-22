@@ -7,7 +7,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
-export function Cadena() {
+export function Cadena({ show, setShow }) {
     Howler.volume(1);
     
     var locked = new Howl({
@@ -18,7 +18,7 @@ export function Cadena() {
         src: ['fx/unlockedSound.mp3']
     });
 
-    const [show, setShow] = useState(false);
+    //const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -42,6 +42,7 @@ export function Cadena() {
             console.log("ouvert");
             unlocked.play();
             handleClose();
+            window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
         }
         else {
             console.log("fermé");
@@ -61,7 +62,7 @@ export function Cadena() {
             Ouvrir le cadenas
         </Button>
     
-        <Modal className='text-center' style={{fontFamily: 'Dancing Script', fontSize: '22px'}} show={show} onHide={handleClose} centered>
+        <Modal className='text-center' style={{fontFamily: 'Dancing Script', fontSize: '22px'}} show={show} onHide={()=> {handleClose(); window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);}} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
                     <Modal.Title className="ms-auto">Cadenas</Modal.Title>
