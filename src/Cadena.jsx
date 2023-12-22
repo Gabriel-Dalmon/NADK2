@@ -42,6 +42,7 @@ export function Cadena({ show, setShow }) {
             unlocked.play();
             handleClose();
             window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
+            bpAppears();
         }
         else {
             console.log("fermé");
@@ -53,6 +54,11 @@ export function Cadena({ show, setShow }) {
         event.preventDefault();
         event.stopPropagation();
     };
+
+    async function bpAppears(){
+        const found = (await SDK3DVerse.engineAPI.findEntitiesByNames('bp2 container'))[0];
+        found.setVisibility(true);
+    }
 
     
     return (
