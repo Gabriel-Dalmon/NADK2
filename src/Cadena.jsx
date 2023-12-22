@@ -38,7 +38,7 @@ export function Cadena() {
 
         console.log(firstCodeNumber, secondCodeNumber, thirdCodeNumber, fourthCodeNumber);
 
-        if (firstCodeNumber === "1" && secondCodeNumber === "1" && thirdCodeNumber === "1" && fourthCodeNumber === "1") {
+        if (firstCodeNumber === "1" && secondCodeNumber === "4" && thirdCodeNumber === "5" && fourthCodeNumber === "2") {
             console.log("ouvert");
             unlocked.play();
             handleClose();
