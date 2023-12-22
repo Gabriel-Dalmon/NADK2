@@ -38,19 +38,19 @@ function MainCard() {
               <Card.Title>Déplacements</Card.Title>
               <Card.Text>
                 Z <br />
-                <ArrowUp color="royalblue" size={24} /> <br />
-                <ArrowLeft color="royalblue" size={24} />
-                <ArrowDown color="royalblue" size={24} />
-                <ArrowRight color="royalblue" size={24} /> <br />
+                <ArrowUp color="LightSalmon" size={24} /> <br />
+                <ArrowLeft color="LightSalmon" size={24} />
+                <ArrowDown color="LightSalmon" size={24} />
+                <ArrowRight color="LightSalmon" size={24} /> <br />
                 Q&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;D <br />
-                <FastForwardFill color="royalblue" size={24} /> E <br />
-                <ChevronDoubleUp color="royalblue" size={24} /> SPACE
+                <FastForwardFill color="LightSalmon" size={24} /> E <br />
+                <ChevronDoubleUp color="LightSalmon" size={24} /> SPACE
               </Card.Text>
             </ListGroup.Item>
             <ListGroup.Item>
               <Card.Title>Interactions</Card.Title>
               <Card.Text>
-                <HandIndex color="royalblue" size={24} /> <br />
+                <HandIndex color="LightSalmon" size={24} /> <br />
                 Clic gauche
               </Card.Text>
             </ListGroup.Item>
@@ -68,14 +68,14 @@ function BlueprintCard() {
           <ListGroup.Item>
             <Card.Title>Quitter Interaction</Card.Title>
             <Card.Text>
-              <HandIndex color="royalblue" size={24} /> <br />
+              <HandIndex color="LightSalmon" size={24} /> <br />
               Clic droit
             </Card.Text>
           </ListGroup.Item>
           <ListGroup.Item>
             <Card.Title>Prendre</Card.Title>
             <Card.Text>
-              <HandIndex color="royalblue" size={24} /> <br />
+              <HandIndex color="LightSalmon" size={24} /> <br />
               Espace
             </Card.Text>
           </ListGroup.Item>
@@ -93,14 +93,14 @@ function RotationInteractionCard() {
           <ListGroup.Item>
             <Card.Title>Quitter Interaction</Card.Title>
             <Card.Text>
-              <HandIndex color="royalblue" size={24} /> <br />
+              <HandIndex color="LightSalmon" size={24} /> <br />
               Clic droit
             </Card.Text>
           </ListGroup.Item>
           <ListGroup.Item>
             <Card.Title>Tourner Objet</Card.Title>
             <Card.Text>
-              <HandIndex color="royalblue" size={24} /> <br />
+              <HandIndex color="LightSalmon" size={24} /> <br />
               bouger la souris
             </Card.Text>
           </ListGroup.Item>

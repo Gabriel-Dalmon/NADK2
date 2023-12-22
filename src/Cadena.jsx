@@ -1,13 +1,12 @@
 import React from 'react';
 import './Cadena.css';
-import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
-export function Cadena() {
+export function Cadena({ show, setShow }) {
     Howler.volume(1);
     
     var locked = new Howl({
@@ -18,7 +17,7 @@ export function Cadena() {
         src: ['fx/unlockedSound.mp3']
     });
 
-    const [show, setShow] = useState(false);
+    //const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -38,10 +37,11 @@ export function Cadena() {
 
         console.log(firstCodeNumber, secondCodeNumber, thirdCodeNumber, fourthCodeNumber);
 
-        if (firstCodeNumber === "1" && secondCodeNumber === "1" && thirdCodeNumber === "1" && fourthCodeNumber === "1") {
+        if (firstCodeNumber === "1" && secondCodeNumber === "4" && thirdCodeNumber === "5" && fourthCodeNumber === "2") {
             console.log("ouvert");
             unlocked.play();
             handleClose();
+            window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
         }
         else {
             console.log("fermé");
@@ -57,11 +57,11 @@ export function Cadena() {
     
     return (
         <>
-        <Button variant="primary" onClick={handleShow}>
+        <Button variant="primary" className='btn-custom' onClick={handleShow}>
             Ouvrir le cadenas
         </Button>
     
-        <Modal className='text-center' show={show} onHide={handleClose} centered>
+        <Modal className='text-center' style={{fontFamily: 'Dancing Script', fontSize: '22px'}} show={show} onHide={()=> {handleClose(); window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);}} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
                     <Modal.Title className="ms-auto">Cadenas</Modal.Title>

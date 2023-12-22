@@ -2,7 +2,7 @@ import { userPublicToken, mainSceneUUID, characterControllerSceneUUID, spawnPosi
 import { useCallback, useEffect } from 'react';
 import { useScript } from '@uidotdev/usehooks';
 
-export function Canvas({ setIsLoading, handleCanvasChange }) {
+export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
     const status = useScript(
         `https://cdn.3dverse.com/legacy/sdk/latest/SDK3DVerse.js`,
         {
@@ -14,8 +14,17 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         console.log(content.dataObject.output);
     }
 
-    //we initialize the global variable for the firstPersonController of the client that we will assigne and use later
-    //window.clientController;
+    //we initialize the global variable ans the setup function for the enigma progression, this is a temporary way to handle enigma, it'll be handled by the server later
+    const setupEnigma = useCallback(async () =>{
+        var found = (await SDK3DVerse.engineAPI.findEntitiesByNames('helicopter'))[0];
+        found.setVisibility(false);
+        for (let i = 1; i <= 4; i++) {
+            found = (await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+i))[0];
+            console.log(found);
+            found.setVisibility(false);
+          }
+    }, []);
+    var handleEnigmaProgression = 0
 
     const setPointerLock = useCallback(async (canvas) => {
         setFPSCameraController(canvas);
@@ -44,7 +53,6 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
     
     const takeControl = useCallback((target) => {
         handleCanvasChange(2);
-        console.log("Entering control");
 
         target = target.entity.getParent();
         const basePosition = target.getGlobalTransform();
@@ -55,11 +63,11 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         distance.push(basePosition.position[0]-playerValue.position[0],basePosition.position[1]-playerValue.position[1],basePosition.position[2]-playerValue.position[2])
         const norm = Math.sqrt(distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2]);
         distance[0]/=norm;
-        distance[1]=0.5;
+        distance[1]=-0.5;
         distance[2]/=norm;
         console.log("distance :"+distance);
         playerValue.position[0]+=2*distance[0];
-        playerValue.position[1]-=distance[1];
+        playerValue.position[1]+=distance[1];
         playerValue.position[2]+=2*distance[2];
 
         target.setGlobalTransform(playerValue);
@@ -69,16 +77,75 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         canvas.addEventListener('click', (e) => focusBackToFPC(target, basePosition, canvas, e));
     }, [focusToEntity, focusBackToFPC, handleCanvasChange]);
 
+    const buildHelicopter = useCallback(async () => {
+        const helicopter = (await SDK3DVerse.engineAPI.findEntitiesByNames('helicopter'))[0];
+        helicopter.setVisibility(true);
+        //SDK3DVerse.engineAPI.registerToEvent("4ac15242-946d-4fec-8256-c516095969d2", "fly", yourFunctionDoodyDude);
+    }, []);
+
     const moveToWorkbench = useCallback(async function (e, canvas, target){
         if(e.code === "Space"){
-            SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "enter_interaction", [target]);
-        target.setVisibility(false);
-        let itemID = target.components.debug_name.value.charAt(10);
-        const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+itemID);
-        await wbItem[0].setVisibility(true);
-        canvas.removeEventListener('keydown', (e) => moveToWorkbench(e, canvas, target));
+            SDK3DVerse.engineAPI.fireEvent("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754", "enter_interaction", [target]);
+            console.log(target);
+            target.setVisibility(false);
+            let itemID = target.components.debug_name.value.charAt(10);
+            const wbItem = await SDK3DVerse.engineAPI.findEntitiesByNames('wb blueprint '+itemID);
+            wbItem[0].setVisibility(true);
+            canvas.removeEventListener('keydown', (e) => moveToWorkbench(e, canvas, target));
+            handleEnigmaProgression +=1
+            console.log(handleEnigmaProgression);
+            if(handleEnigmaProgression === 4){
+                buildHelicopter()
+            }
         }
-    }, []);
+    }, [buildHelicopter]);
+
+    const bluePrintInterract = useCallback((target) => {
+        const moveHandler = (e) => moveToWorkbench(e, canvas, target);
+
+        let canvas = document.getElementById("display-canvas");
+        handleCanvasChange(1);
+        canvas.addEventListener('keydown', moveHandler);
+        SDK3DVerse.actionMap.values["JUMP"] = [[]];
+        SDK3DVerse.actionMap.propagate();
+
+        target = target.entity.getParent();
+        const basePosition = target.getGlobalTransform();
+        const playerValue = SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform();
+        console.log("trigger:");
+        
+        var distance = [];
+        distance.push(basePosition.position[0]-playerValue.position[0],basePosition.position[1]-playerValue.position[1],basePosition.position[2]-playerValue.position[2])
+        const norm = Math.sqrt(distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2]);
+        distance[0]/=norm;
+        distance[1]=0.5;
+        distance[2]/=norm;
+        playerValue.position[0]+=2*distance[0];
+        playerValue.position[1]-=distance[1];
+        playerValue.position[2]+=2*distance[2];
+
+        target.setGlobalTransform(playerValue);
+        SDK3DVerse.engineAPI.fireEvent("191b5072-b834-40f0-a616-88a6fc2bd7a3", "horizontal", [target]);
+        focusToEntity(target);
+        
+        setTimeout(canvas.addEventListener('click', (e) => {
+            focusBackToFPC(target, basePosition, canvas, e);
+            canvas.removeEventListener('keydown', moveHandler);
+            SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]];
+            SDK3DVerse.actionMap.propagate();
+        }, 1000));
+        setTimeout(canvas.addEventListener('keydown', (e) => {if(e.code === "Space"){
+            handleCanvasChange(0);
+            SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);
+            SDK3DVerse.engineAPI.detachClientFromScripts(target);
+            target.setGlobalTransform(basePosition);
+            setTimeout(()=>{SDK3DVerse.actionMap.values["JUMP"] = [["KEY_32"]]}, 500);
+            SDK3DVerse.actionMap.propagate();
+        }}, 1000));
+        console.log("cardID");
+    }, [focusToEntity, focusBackToFPC, handleCanvasChange, moveToWorkbench]);
+
+    
 
     const focusObject = useCallback(async (e, canvas) => {
         // Test if the button was indeed left click
@@ -86,16 +153,22 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
             // Screen Space Ray on the middle of the screen
             // This stores an [object Promise] in the JS variable
             let objectClicked = await SDK3DVerse.engineAPI.castScreenSpaceRay(canvas.width/2, canvas.height/2, true, false, false);
-            console.log(e);
+            console.log(objectClicked.entity.getComponent("debug_name"))
             if(objectClicked.entity != null)
             {
+                console.log(objectClicked.entity);
                 if(objectClicked.entity.isAttached('script_map') ) { 
-                    if("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements){
-                        takeControl(objectClicked,);
+                    if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
+                        console.log("yep");
+                        bluePrintInterract(objectClicked,);
                         
-                    }else if("2a32b613-d9c1-4ebe-b5a8-7f1b8aa4f754" in objectClicked.entity.getComponent('script_map').elements){
-                        canvas.addEventListener('keydown', (e) => moveToWorkbench(e, canvas, objectClicked.entity));
+                    }else if(("4002db8b-f68b-4d85-bc12-988b6afabbfe" in objectClicked.entity.getComponent('script_map').elements)||("0c9049c1-d280-48ed-9cca-e5c56957cd63" in objectClicked.entity.getComponent('script_map').elements)){
+                        takeControl(objectClicked,);
                     }
+                } else if (objectClicked.entity.getComponent("debug_name").value === "Code") {
+                    console.log("Is Lock")
+                    showLock();
+
                 }
             }
             else
@@ -107,7 +180,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         // If an object was hit, duplicate it in a scaled verison, handleable by players
         // Camera work
         // Character work
-    }, [takeControl, moveToWorkbench]);
+    }, [takeControl, bluePrintInterract]);
 
   
     //------------------------------------------------------------------------------
@@ -116,6 +189,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
+        console.log("Initiating First Person Controller Spawn")
         const playerTemplate = new SDK3DVerse.EntityTemplate();
         playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
         playerTemplate.attachComponent("local_transform", { position: spawnPosition });
@@ -145,7 +219,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         const firstPersonCamera = children.find((child) =>
           child.isAttached("camera")
         );
-
+        SDK3DVerse.engineAPI.fireEvent("a25ea293-d682-45d3-962f-bd63e870a7d3", "call_constructor", [firstPersonController]);
         // We need to assign the current client to the first person controller
         // script which is attached to the firstPersonController entity.
         // This allows the script to know which client inputs it should read.
@@ -159,10 +233,7 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         setIsLoading(false);
     }, [setIsLoading]);
 
-    const buildHelicopter = useCallback( () => {
-        const helicopter = SDK3DVerse.engineAPI.findEntitiesByNames('helicopter');
-        helicopter.setVisibility(true);
-    }, []);
+    
 
     const initApp = useCallback(async () => {
         let canvas = document.getElementById("display-canvas");
@@ -189,7 +260,10 @@ export function Canvas({ setIsLoading, handleCanvasChange }) {
         SDK3DVerse.engineAPI.registerToEvent("9e5e8313-b217-4c22-b00f-cf6ea44ec170", "log", callbackConsoleEvent);
         // Build the helicopter
         SDK3DVerse.engineAPI.registerToEvent("4ac15242-946d-4fec-8256-c516095969d2", "build", buildHelicopter);
-    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading]);
+
+        //setup enigma
+        setTimeout(() => {setupEnigma(); SDK3DVerse.engineAPI.startSimulation()}, 1000);
+    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading, setupEnigma]);
 
     const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
