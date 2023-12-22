@@ -1,13 +1,12 @@
 import React from 'react';
 import './Cadena.css';
-import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
-export function Cadena() {
+export function Cadena({ show, setShow }) {
     Howler.volume(1);
     
     var locked = new Howl({
@@ -17,8 +16,6 @@ export function Cadena() {
     var unlocked = new Howl({
         src: ['fx/unlockedSound.mp3']
     });
-
-    const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -57,7 +54,7 @@ export function Cadena() {
     
     return (
         <>
-        <Button variant="primary" onClick={handleShow}>
+        <Button variant="primary" className='btn-custom' onClick={handleShow}>
             Ouvrir le cadenas
         </Button>
     

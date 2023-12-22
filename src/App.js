@@ -13,6 +13,7 @@ import LoadingScreen from './LoadingScreen';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [cardState, setCardState] = useState(0);
+  const [show, setShow] = useState(false);
 
   return (
     <div className='App' style={{fontFamily: 'Dancing Script', fontSize: '22px'}}>
@@ -21,7 +22,7 @@ function App() {
           <LoadingScreen isLoading={isLoading} /> : (
           <div>
             <CardCanvas setCardState={setCardState} cardState={cardState} />
-            <div style={{marginTop:'.6rem'}}><Cadena /></div>
+            <Cadena show={show} setShow={setShow}/>
           </div>
         )}
       </div>
