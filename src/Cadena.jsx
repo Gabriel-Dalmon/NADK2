@@ -1,12 +1,12 @@
 import React from 'react';
 import './Cadena.css';
-import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
+export function Cadena({ show, setShow }) {
 export function Cadena({ show, setShow }) {
     Howler.volume(1);
     
@@ -58,7 +58,7 @@ export function Cadena({ show, setShow }) {
     
     return (
         <>
-        <Button variant="primary" onClick={handleShow}>
+        <Button variant="primary" className='btn-custom' onClick={handleShow}>
             Ouvrir le cadenas
         </Button>
     
