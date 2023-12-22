@@ -6,9 +6,11 @@ function LoadingScreen({ isLoading }) {
   return (
     <>
     {isLoading ? (
-        <div className="loading-screen">
-            <ReactLoading type={'bubbles'} color='black' height={32} width={32} />
-            <p>Loading...</p>
+        <div className='loading-screen'>
+          <span className='loading-font'>
+            <ReactLoading type={'bubbles'} color='black' height={33} width={33} />
+            <p style={{margin: '0'}}>Loading...</p>
+          </span>
         </div>
     ) : (null)}
     </>

@@ -1,0 +1,8 @@
+.btn-custom {
+    background: Coral;
+    transition: 0.4s;
+}
+
+.btn-custom Button:hover {
+    background: LightSalmon;
+}

@@ -1,4 +1,5 @@
 import './App.css';
+import './custom.scss';
 // Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 // Bootstrap Bundle JS
@@ -13,15 +14,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [cardState, setCardState] = useState(0);
 
-  // Exemple de simulation de chargement
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setIsLoading(false); // Met fin à l'écran de chargement après un délai
-  //   }, 3000);
-  // }, []);
-
   return (
-    <div className='App'>
+    <div className='App' style={{fontFamily: 'Dancing Script', fontSize: '22px'}}>
       <div style={{zIndex: '1', position:'absolute'}}>
         {isLoading? 
           <LoadingScreen isLoading={isLoading} /> : (

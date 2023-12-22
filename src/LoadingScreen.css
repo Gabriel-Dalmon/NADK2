@@ -1,9 +1,20 @@
 .loading-screen {
     display: flex;
+    flex-wrap: wrap;
     width: 100vw;
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background-color: LightSalmon;
-    /* background-image:  */
+    /* background-color: LightSalmon; */
+    background-image: url('../public/LeonardDeVinci_Amphi.jpg');
+    background-repeat: no-repeat;
+    background-position: 50% 0;
+    background-size: cover;
+}
+
+.loading-font {
+    white-space: nowrap;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, .5);
+    border-radius: 5px;
 }

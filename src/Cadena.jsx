@@ -61,7 +61,7 @@ export function Cadena() {
             Ouvrir le cadenas
         </Button>
     
-        <Modal className='text-center' show={show} onHide={handleClose} centered>
+        <Modal className='text-center' style={{fontFamily: 'Dancing Script', fontSize: '22px'}} show={show} onHide={handleClose} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
                     <Modal.Title className="ms-auto">Cadenas</Modal.Title>
