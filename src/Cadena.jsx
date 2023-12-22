@@ -7,7 +7,6 @@ import Modal from 'react-bootstrap/Modal';
 import {Howl, Howler} from 'howler';
 
 export function Cadena({ show, setShow }) {
-export function Cadena({ show, setShow }) {
     Howler.volume(1);
     
     var locked = new Howl({
