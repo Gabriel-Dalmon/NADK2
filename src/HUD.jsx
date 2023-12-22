@@ -29,6 +29,13 @@ export function CardCanvas({ setCardState, cardState }){
   );
 }
 
+export function CrossHair() {
+  return (
+    <>
+      <div className="crosshair"></div>
+    </>
+)}
+
 function MainCard() {
     return (
       <Card className="margin text-center">

@@ -2,3 +2,22 @@
     margin-top: .6rem;
     margin-left:.6rem;
 }
+
+.box {
+    margin: 0;
+    top: 50%;
+    left: 50%;
+}
+
+.crosshair {
+    width: 10px;
+    height: 10px;
+    opacity: .6;
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 9999; /* Valeur de z-index élevée */
+}

@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { useState } from 'react';
 import { Canvas } from './Canvas';
-import { CardCanvas } from './HUD';
+import { CardCanvas, CrossHair } from './HUD';
 import { Cadena } from './Cadena';
 import LoadingScreen from './LoadingScreen';
 
@@ -17,14 +17,19 @@ function App() {
 
   return (
     <div className='App' style={{fontFamily: 'Dancing Script', fontSize: '22px'}}>
-      <div style={{zIndex: '1', position:'absolute'}}>
-        {isLoading? 
-          <LoadingScreen isLoading={isLoading} /> : (
-          <div>
-            <CardCanvas setCardState={setCardState} cardState={cardState} />
-            <div style={{marginTop:'.6rem'}}><Cadena show={showLock} setShow={setShowLock} /></div>
+      {isLoading? 
+        <LoadingScreen isLoading={isLoading} /> : (
+        <div>
+          <div style={{zIndex: '1', position: 'absolute'}}>
+          <CardCanvas setCardState={setCardState} cardState={cardState} />
+          <Cadena show={showLock} setShow={setShowLock} />
           </div>
-        )}
+          <div>
+            <CrossHair />
+          </div>
+        </div>
+      )}
+      <div >
       </div>
       <div>
         <Canvas showLock={()=>{setShowLock(true); SDK3DVerse.engineAPI.detachClientFromScripts(window.clientController); }} setIsLoading={setIsLoading} handleCanvasChange={setCardState} />

@@ -1,4 +1,6 @@
 .loading-screen {
+    z-index: 1;
+    position: absolute;
     display: flex;
     flex-wrap: wrap;
     width: 100vw;
