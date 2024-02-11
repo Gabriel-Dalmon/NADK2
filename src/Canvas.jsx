@@ -188,6 +188,7 @@ export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
     //------------------------------------------------------------------------------
 
     const InitFirstPersonController = useCallback(async (charCtlSceneUUID, spawnPosition) => {
+        setIsLoading(true);
         // To spawn an entity we need to create an EntityTempllate and specify the
         // components we want to attach to it. In this case we only want a scene_ref
         // that points to the character controller scene.
@@ -230,7 +231,6 @@ export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
         // Finally set the first person camera as the main camera.
         SDK3DVerse.setMainCamera(firstPersonCamera);
         window.clientController = firstPersonController;
-
         
         setIsLoading(false);
     }, [setIsLoading]);
@@ -239,7 +239,7 @@ export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
 
     const initApp = useCallback(async () => {
         let canvas = document.getElementById("display-canvas");
-        setIsLoading(true);
+        
         // Join or start the session
         await SDK3DVerse.joinOrStartSession({
             userToken: userPublicToken,
@@ -266,7 +266,7 @@ export function Canvas({ showLock, setIsLoading, handleCanvasChange }) {
         //setup enigma
         setTimeout(() => {setupEnigma(); SDK3DVerse.engineAPI.startSimulation()}, 1000);
 
-    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setIsLoading, setupEnigma]);
+    }, [InitFirstPersonController, setPointerLock, focusObject, buildHelicopter, setupEnigma]);
 
     const setFPSCameraController = async (canvas) => {
         // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 

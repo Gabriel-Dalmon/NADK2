@@ -21,16 +21,14 @@ function App() {
         <LoadingScreen isLoading={isLoading} /> : (
         <div>
           <div style={{zIndex: '1', position: 'absolute'}}>
-          <CardCanvas setCardState={setCardState} cardState={cardState} />
-          <Cadena show={showLock} setShow={setShowLock} />
+            <CardCanvas setCardState={setCardState} cardState={cardState} />
+            <Cadena show={showLock} setShow={setShowLock} />
           </div>
           <div>
             <CrossHair />
           </div>
         </div>
       )}
-      <div >
-      </div>
       <div>
         <Canvas showLock={()=>{setShowLock(true); SDK3DVerse.engineAPI.detachClientFromScripts(window.clientController); }} setIsLoading={setIsLoading} handleCanvasChange={setCardState} />
       </div>
