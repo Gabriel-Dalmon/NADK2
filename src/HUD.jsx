@@ -1,9 +1,13 @@
 import React from 'react';
 import './HUD.css';
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
-import { ArrowUp, ArrowRight, ArrowLeft, ArrowDown, FastForwardFill, ChevronDoubleUp, HandIndex } from 'react-bootstrap-icons';
-import Button from 'react-bootstrap/Button';
+// import Button from 'react-bootstrap/Button';
+import Image from 'react-bootstrap/Image';
+import BasiqueCard from './img/Interface.png';
+import InteractionCard from './img/Interface_2.png';
+import RotationCard from './img/Interface_3.png';
+import Basique from './img/Interface_5.png';
+import Interaction from './img/Interface_6.png';
+import Rotation from './img/Interface_7.png';
 
 
 export function CardCanvas({ setCardState, cardState }){
@@ -17,14 +21,14 @@ export function CardCanvas({ setCardState, cardState }){
   return (
     <>
       <div className='margin'>
-        <Button variant="primary" onClick={() => handleCardChange(0)}>MainCard</Button>
-        <Button variant="primary" onClick={() => handleCardChange(1)}>BlueprintCard</Button>
-        <Button variant="primary" onClick={() => handleCardChange(2)}>RotationInteractionCard</Button>
+        <Image className='cust-button' src={Basique} onClick={() => handleCardChange(0)} />
+        <Image className='cust-button' src={Interaction} onClick={() => handleCardChange(1)} /><br/>
+        <Image className='cust-button2' src={Rotation} onClick={() => handleCardChange(2)} />
       </div>
 
-      {cardState === 0 && <MainCard />}
-      {cardState === 1 && <BlueprintCard />}
-      {cardState === 2 && <RotationInteractionCard />}
+      {cardState === 0 && <Image className='controls fluid text-center' src={BasiqueCard} />}
+      {cardState === 1 && <Image className='controls fluid text-center' src={InteractionCard} />}
+      {cardState === 2 && <Image className='controls fluid text-center' src={RotationCard} />}
     </>
   );
 }
@@ -35,83 +39,3 @@ export function CrossHair() {
       <div className="crosshair"></div>
     </>
 )}
-
-function MainCard() {
-    return (
-      <Card className="margin text-center">
-        <Card.Header>Contrôles</Card.Header>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
-              <Card.Title>Déplacements</Card.Title>
-              <Card.Text>
-                Z <br />
-                <ArrowUp color="LightSalmon" size={24} /> <br />
-                <ArrowLeft color="LightSalmon" size={24} />
-                <ArrowDown color="LightSalmon" size={24} />
-                <ArrowRight color="LightSalmon" size={24} /> <br />
-                Q&nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;D <br />
-                <FastForwardFill color="LightSalmon" size={24} /> E <br />
-                <ChevronDoubleUp color="LightSalmon" size={24} /> SPACE
-              </Card.Text>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Card.Title>Interactions</Card.Title>
-              <Card.Text>
-                <HandIndex color="LightSalmon" size={24} /> <br />
-                Clic gauche
-              </Card.Text>
-            </ListGroup.Item>
-          </ListGroup>
-      </Card>
-    );
-};
-
-
-function BlueprintCard() {
-  return (
-    <Card className="margin text-center">
-      <Card.Header>Contrôles</Card.Header>
-        <ListGroup variant="flush">
-          <ListGroup.Item>
-            <Card.Title>Quitter Interaction</Card.Title>
-            <Card.Text>
-              <HandIndex color="LightSalmon" size={24} /> <br />
-              Clic droit
-            </Card.Text>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <Card.Title>Prendre</Card.Title>
-            <Card.Text>
-              <HandIndex color="LightSalmon" size={24} /> <br />
-              Espace
-            </Card.Text>
-          </ListGroup.Item>
-        </ListGroup>
-    </Card>
-  );
-};
-
-
-function RotationInteractionCard() {
-  return (
-    <Card className="margin text-center">
-      <Card.Header>Contrôles</Card.Header>
-        <ListGroup variant="flush">
-          <ListGroup.Item>
-            <Card.Title>Quitter Interaction</Card.Title>
-            <Card.Text>
-              <HandIndex color="LightSalmon" size={24} /> <br />
-              Clic droit
-            </Card.Text>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <Card.Title>Tourner Objet</Card.Title>
-            <Card.Text>
-              <HandIndex color="LightSalmon" size={24} /> <br />
-              bouger la souris
-            </Card.Text>
-          </ListGroup.Item>
-        </ListGroup>
-    </Card>
-  );
-};

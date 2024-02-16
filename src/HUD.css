@@ -9,6 +9,22 @@
     left: 50%;
 }
 
+.controls {
+    max-width: 25rem !important;
+    height: auto !important;
+}
+
+.cust-button {
+    max-width: 12rem;
+    height: auto;
+}
+
+.cust-button2 {
+    max-width: 20rem;
+    height: auto;
+}
+
+
 .crosshair {
     width: 10px;
     height: 10px;

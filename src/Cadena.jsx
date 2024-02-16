@@ -4,7 +4,9 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
+import Image from 'react-bootstrap/Image'
 import {Howl, Howler} from 'howler';
+import OuvrirCadena from './img/Interface_4.png'
 
 export function Cadena({ show, setShow }) {
     Howler.volume(1);
@@ -63,9 +65,7 @@ export function Cadena({ show, setShow }) {
     
     return (
         <>
-        <Button variant="primary" className='btn-custom' onClick={handleShow}>
-            Ouvrir le cadenas
-        </Button>
+        <Image className='cust-button' src={OuvrirCadena} onClick={handleShow} />
     
         <Modal className='text-center' style={{fontFamily: 'Dancing Script', fontSize: '22px'}} show={show} onHide={()=> {handleClose(); window.SDK3DVerse.engineAPI.assignClientToScripts(window.clientController);}} centered>
             <Form onSubmit={handleSubmit}>

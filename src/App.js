@@ -21,7 +21,7 @@ function App() {
         <LoadingScreen isLoading={isLoading} /> : (
         <div>
           <div style={{zIndex: '1', position: 'absolute'}}>
-            <CardCanvas setCardState={setCardState} cardState={cardState} />
+            <CardCanvas setCardState={setCardState} cardState={cardState} /><br/>
             <Cadena show={showLock} setShow={setShowLock} />
           </div>
           <div>

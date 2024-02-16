@@ -1,3 +1,5 @@
-.btn-custom {
+.cust-button {
     margin-top: .6rem;
+    max-width: 12rem;
+    height: auto;
 }
